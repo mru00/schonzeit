@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>element layout</title>
+        <title>Schonzeit</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -10,6 +10,11 @@
         <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
         <style>
+
+#tabular {
+    font-size: 80%;
+}
+
 .pro_P {
     background-color: red;
 }
@@ -117,7 +122,6 @@ var SZ = {
 
 function find_data_year(data, current_year) {
 
-
     for (var y = current_year; y > current_year - 10; y--) {
         var y2 = y+1900;
         console.log(y2);
@@ -162,13 +166,11 @@ $(document).ready(function() {
         $('#today').html(format_date(now));
     }
 
-
     $(function() {
         print_table();
     });
 });
         </script>
-
 
     </head>
 
@@ -193,9 +195,7 @@ $(document).ready(function() {
                 <a href="https://github.com/mru00/board-layout">Repository</a>
             </div>
 
-
         </div>
-
 
     </body>
 </html>
