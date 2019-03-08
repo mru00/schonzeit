@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>element layout</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <style>
+.pro_P {
+    background-color: red;
+}
+    .pro_NP {
+        background-color: GreenYellow;
+    }
+@media print {
+    .avoid-page-break { page-break-inside: avoid; }
+}
+        </style>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-git.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+        <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.6/svg.min.js"></script>
+
+        <script type="text/javascript">
+
+
+function make_date( day, month ) {
+    return new Date(new Date().getFullYear(), month -1 , day);
+}
+
+function make_protection(begin_day, begin_month, end_day, end_month) {
+    return { "begin": [begin_day, begin_month], "end": [end_day, end_month] };
+}
+
+function my_date_lt(a, b) {
+    return (a[1] < b[1]) || (a[1] == b[1] && a[0] <= b[0]);
+}
+
+function is_protected(fish, when) {
+    if (!fish.protection) return false;
+
+    var begin = fish.protection.begin;
+    var end = fish.protection.end;
+
+    if (my_date_lt(begin, end)) return my_date_lt(begin, when) && my_date_lt(when, end);
+    return my_date_lt(when, end) || my_date_lt(begin, when);
+}
+
+function format_date(when) {
+    var d = when[0];
+    var m = when[1];
+    var mon = [ "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez" ];
+    return '' + (d <= 9 ? '0' + d : d) + ' ' + mon[m-1];
+    //return '' + (d <= 9 ? '0' + d : d) + '.' + (m<=9 ? '0' + m : m);
+}
+
+function get_data(sz, path) {
+    if (path.length == 0) return sz;
+    return get_data(sz[path[0]], path.slice(1));
+}
+
+var wiki_de = "https://de.wikipedia.org/wiki/";
+var fish_info = {
+    Aitel:           { alt_names : ["Döbel"] },
+    Äsche:           { wiki: wiki_de + "Europ%C3%A4ische_%C3%84sche" },
+    Karpfen:         { wiki: wiki_de + "Karpen" },
+    Renke:           { alt_names:["Maräne"] },
+    Zander:          { wiki: wiki_de + "Zander" },
+};
+
+var SZ = {
+    Österreich: {
+        Klosterneuburg: {
+            Untere_Donau: {
+                web: "http://www.fisch-klbg.at/revier/",
+                2018: {
+                    Aal:                  {  },
+                    Aalrutte:             { protection: make_protection(1,12,  29,2), bm: 35 },
+                    Aitel:                {  },
+                    Äsche:                { protection: make_protection(1,3,   30,4), bm: 30 },
+                    Bachforelle:          { protection: make_protection(16,9,  15,3), bm: 25 },
+                    Bachsaibling:         { protection: make_protection(16,9,  15,3), bm: 22 },
+                    Barbe:                { protection: make_protection(1,5,   15,6), bm: 30 },
+                    Brachse:              { protection: make_protection(1,5,   31,5), bm: 25 },
+                    Elritze:              { protection: make_protection(1,4,   31,5) },
+                    Flussbarsch:          { protection: make_protection(1,3,   31,5) },
+                    Giebel:               {  },
+                    Gründling:            { protection: make_protection(1,5,   31,5) },
+                    Güster:               { protection: make_protection(1,5,   31,5) },
+                    Hasel:                { protection: make_protection(16,3,  31,5) },
+                    Hecht:                { protection: make_protection(1,2,   31,5), bm: 60 },
+                    Huchen:               { protection: make_protection(1,3,   31,5), bm: 75 },
+                    Karausche:            { protection: make_protection(1,5,   31,5) },
+                    Karpfen :             { bm: 35 },
+                    Kaulbarsch:           { protection: make_protection(1,4,   31,5), bm: 10 },
+                    Koppe:                { protection: make_protection(1,2,   30,4) },
+                    Laube:                { protection: make_protection(16,5,  30,6) },
+                    Renke:                { protection: make_protection(16,10, 31,12), bm: 30 },
+                    Marmorgrundel:        { },
+                    Nase:                 { protection: make_protection(1,3,   15,5), bm: 35 },
+                    Nerfling:             { protection: make_protection(1,5,   30,6), bm: 35 },
+                    Regenbogenforelle:    { protection: make_protection(1,1,   15,3), bm: 25 },
+
+                    // cut
+                    Zander:               { protection: make_protection(1,2,   31,5) },
+                }
+            }
+        }
+    }
+};
+
+function find_data_year(data, current_year) {
+
+
+    for (var y = current_year; y > current_year - 10; y--) {
+        var y2 = y+1900;
+        console.log(y2);
+        if (y2 in data) {
+            return data[y2];
+        }
+    }
+    return null;
+}
+
+
+$(document).ready(function() {
+    "use strict";
+
+    function print_table() {
+        $('#tabular > tbody').empty();
+        var now = new Date();
+
+        var path = [ "Österreich", "Klosterneuburg", "Untere_Donau" ];
+        var fish_data = find_data_year(get_data(SZ, path), now.getYear());
+
+        $('#water').html(path.join("; "));
+
+        now = [ now.getDate(), now.getMonth() +1 ];
+
+        for (var fish_name in fish_data) {
+            var fish = fish_data[fish_name];
+
+            var bm = fish.bm ? fish.bm : "";
+            var begin = fish.protection ? format_date(fish.protection.begin) : "-";
+            var end = fish.protection ? format_date(fish.protection.end) : "-";
+            if (fish_name in fish_info && "wiki" in fish_info[fish_name]) {
+                fish_name = '<a href="' + fish_info[fish_name].wiki + '">'+fish_name+'</a>';
+            }
+
+            var pro = is_protected(fish, now) ? "P" : "NP";
+            var pro_t = is_protected(fish, now) ? "SZ" : "";
+
+            $('#tabular').append('<tr><td>' + fish_name + '</td><td class="pro_'+pro+'">'+pro_t+'</td><td>'+begin+'</td><td>'+end+'</td><td>'+bm+'</td></tr>');
+        }
+
+        $('#today').html(format_date(now));
+    }
+
+
+    $(function() {
+        print_table();
+    });
+});
+        </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <h1>Schonzeiten</h1>
+
+            <div class="avoid-page-break">
+                <div id="today"></div>
+                <div id="water"></div>
+
+                <table id="tabular" class="table table-striped table-condensed" style="width:100%">
+                    <thead>
+                        <tr><th>Fisch</th><th>SZ</th><th>Beginn</th><th>Ende</th><th>BM</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="d-print-none">
+                <h2>About</h2>
+                <a href="https://github.com/mru00/board-layout">Repository</a>
+            </div>
+
+
+        </div>
+
+
+    </body>
+</html>
