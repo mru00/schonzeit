@@ -76,7 +76,9 @@ var fish_info = {
     Äsche:           { wiki: wiki_de + "Europ%C3%A4ische_%C3%84sche" },
     Karpfen:         { wiki: wiki_de + "Karpen" },
     Renke:           { alt_names:["Maräne"] },
-    Zander:          { wiki: wiki_de + "Zander" },
+    Zander:          { alt_names:["Schill"], wiki: wiki_de + "Zander" },
+    Rußnase:         { alt_names:["Zährte"] },
+    Schied:          { alt_names:["Rapfen"] },
 };
 
 var SZ = {
@@ -84,7 +86,7 @@ var SZ = {
         Klosterneuburg: {
             Untere_Donau: {
                 web: "http://www.fisch-klbg.at/revier/",
-                2018: {
+                2019: {
                     Aal:                  {  },
                     Aalrutte:             { protection: make_protection(1,12,  29,2), bm: 35 },
                     Aitel:                {  },
@@ -111,9 +113,24 @@ var SZ = {
                     Nase:                 { protection: make_protection(1,3,   15,5), bm: 35 },
                     Nerfling:             { protection: make_protection(1,5,   30,6), bm: 35 },
                     Regenbogenforelle:    { protection: make_protection(1,1,   15,3), bm: 25 },
-
-                    // cut
-                    Zander:               { protection: make_protection(1,2,   31,5) },
+                    Rotauge:              { protection: make_protection(1,4,   31,5) },
+                    Rotfeder:             { protection: make_protection(1,4,   31,5) },
+                    Rußnase:              { protection: make_protection(16,4,  15,6), bm: 30 },
+                    Schied:               { protection: make_protection(16,4,  31,5), bm: 40 },
+                    Schleie:              { protection: make_protection(1,6,   30,6), bm: 30 },
+                    Schmerle:             { protection: make_protection(1,3,   31,5) },
+                    Seeforelle:           { protection: make_protection(16,9,  15,3), bm: 50 },
+                    Seesaibling:          { protection: make_protection(16,9,  15,3), bm: 28 },
+                    Sterlet:              { protection: make_protection(1,5,   30,6), bm: 45 },
+                    Stichling:            { protection: make_protection(1,5,   30,6) },
+                    Weißflossengründling: { protection: make_protection(15,4,  15,6) },
+                    Wels:                 { protection: make_protection(1,6,   30,6), bm: 60 },
+                    Wildkarpfen:          { protection: make_protection(1,5,   30,6), bm: 35 },
+                    Wolgazander:          { protection: make_protection(1,2,   31,5), bm: 35 },
+                    Zander:               { protection: make_protection(1,2,   31,5), bm: 50 },
+                    Zingel:               { protection: make_protection(15,3,  31,5), bm: 20 },
+                    Zobel:                { protection: make_protection(15,4,  31,5), bm: 25 },
+                    Krebse_männlich:      { protection: make_protection(1,10,  31,5), bm: 12 },
                 }
             }
         }
@@ -122,11 +139,9 @@ var SZ = {
 
 function find_data_year(data, current_year) {
 
-    for (var y = current_year; y > current_year - 10; y--) {
-        var y2 = y+1900;
-        console.log(y2);
-        if (y2 in data) {
-            return data[y2];
+    for (var y = current_year; y > current_year - 20; y--) {
+        if (y in data) {
+            return y;
         }
     }
     return null;
@@ -141,8 +156,10 @@ $(document).ready(function() {
         var now = new Date();
 
         var path = [ "Österreich", "Klosterneuburg", "Untere_Donau" ];
-        var fish_data = find_data_year(get_data(SZ, path), now.getYear());
+        var data_year = find_data_year(get_data(SZ, path), 1900 + now.getYear());
+        var fish_data = get_data(SZ, path)[data_year];
 
+        $('#data_year').html(data_year);
         $('#water').html(path.join("; "));
 
         now = [ now.getDate(), now.getMonth() +1 ];
@@ -153,14 +170,23 @@ $(document).ready(function() {
             var bm = fish.bm ? fish.bm : "";
             var begin = fish.protection ? format_date(fish.protection.begin) : "-";
             var end = fish.protection ? format_date(fish.protection.end) : "-";
+            var fish_names = [fish_name];
+            if (fish_name in fish_info && "alt_names" in fish_info[fish_name]) {
+                fish_names = fish_names.concat(fish_info[fish_name].alt_names);
+            }
+            var fish_display_name = fish_names.join(" / ");
             if (fish_name in fish_info && "wiki" in fish_info[fish_name]) {
-                fish_name = '<a href="' + fish_info[fish_name].wiki + '">'+fish_name+'</a>';
+                fish_display_name = '<a href="' + fish_info[fish_name].wiki + '">'+fish_display_name+'</a>';
             }
 
             var pro = is_protected(fish, now) ? "P" : "NP";
             var pro_t = is_protected(fish, now) ? "SZ" : "";
 
-            $('#tabular').append('<tr><td>' + fish_name + '</td><td class="pro_'+pro+'">'+pro_t+'</td><td>'+begin+'</td><td>'+end+'</td><td>'+bm+'</td></tr>');
+            $('#tabular').append('<tr>' + 
+                '<td>' + fish_display_name + '</td>' + 
+                '<td class="pro_'+pro+'">'+begin+'</td>' + 
+                '<td class="pro_'+pro+'">'+end+'</td>' + 
+                '<td>'+bm+'</td></tr>');
         }
 
         $('#today').html(format_date(now));
@@ -181,10 +207,11 @@ $(document).ready(function() {
             <div class="avoid-page-break">
                 <div id="today"></div>
                 <div id="water"></div>
+                <div id="data_year"></div>
 
                 <table id="tabular" class="table table-striped table-condensed" style="width:100%">
                     <thead>
-                        <tr><th>Fisch</th><th>SZ</th><th>Beginn</th><th>Ende</th><th>BM</th></tr>
+                        <tr><th>Fisch</th><th>Beginn</th><th>Ende</th><th>BM</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -192,7 +219,7 @@ $(document).ready(function() {
 
             <div class="d-print-none">
                 <h2>About</h2>
-                <a href="https://github.com/mru00/board-layout">Repository</a>
+                <a href="https://github.com/mru00/schonzeit">Repository</a>
             </div>
 
         </div>
